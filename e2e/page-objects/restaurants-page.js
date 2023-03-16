@@ -22,6 +22,7 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.resultCounter = page.locator('[data-qa="sidebar-result-counter"]');
         this.resetBtn = page.locator('[data-qa="sidebar-reset"]');
         this.openNowCheckBox = page.locator('[data-qa="availability-filter-switch"]');
+        this.restaurantCards = page.locator('[data-qa="mov-indicator-content"] [data-qa="text"]');
     }
 
     async goto() {
@@ -45,6 +46,25 @@ exports.RestaurantsPage = class RestaurantsPage {
     }
 
     async getResultCounter(){
-        return (Number(this.resultCounter().replace(/[^0-9]/g, '')));
+        return Number((await this.resultCounter.innerText()).replace(/[^0-9]/g, ''));
+    }
+
+    async showAllResults(){
+        await this.page.evaluate(async () => {
+            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+            for (let i = 0; i < document.body.scrollHeight; i += 100) {
+                window.scrollTo(0, i);
+                await delay(100);
+            }
+        });
+    }
+
+    async verifyRandomResultOfMinOrder() {
+        //Expect actual returned cards count equal to the number displayed in the result counter
+        await expect(await this.restaurantCards.count()).toEqual(await this.getResultCounter());
+        //Pick random card and verify the min order value
+        let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
+        let minOrderValue = Number((await this.restaurantCards.nth(randomIndex).innerText()).replace(/[^0-9\.-]+/g, "")/100);
+        await expect(minOrderValue).toBeLessThanOrEqual(10);
     }
 }

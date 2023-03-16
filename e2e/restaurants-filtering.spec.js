@@ -10,7 +10,6 @@ test.describe('Filtering restaurants list', async () => {
         const context = await browser.newContext();
         await context.grantPermissions(['geolocation'], { origin: 'https://www.lieferando.de/en/' });
         page = await context.newPage();
-        // page = await browser.newPage(); // Create a new Page instance
         restaurantsPage = new RestaurantsPage(page);
         console.log(`Running ${testInfo.title}`);
         await restaurantsPage.goto();
@@ -19,10 +18,11 @@ test.describe('Filtering restaurants list', async () => {
         await restaurantsPage.searchAddress(address);
     });
 
-    test('filter by minimum order of 10,00 € or less for open now restaurants', async () => {
+    test('filter by minimum order of 10,00 € or less', async () => {
         await restaurantsPage.filterByMinimumOrderValue();
         await restaurantsPage.filterByOpenNow(); // Exclude closed restaurants as they don't show min order info on restaurant card
-        // TODO Verify restaurants are filtered as expected
+        await restaurantsPage.showAllResults();
+        await restaurantsPage.verifyRandomResultOfMinOrder();
     });
 
     test('filter by Italian Cuisine', async () => {
