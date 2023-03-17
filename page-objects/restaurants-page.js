@@ -1,4 +1,5 @@
 const { expect } = require('@playwright/test');
+const { RESTAURANTS_CATEGORIES } = require('../constants/restaurants-categories');
 
 exports.RestaurantsPage = class RestaurantsPage {
 
@@ -22,9 +23,19 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.resultCounter = page.locator('[data-qa="sidebar-result-counter"]');
         this.resetBtn = page.locator('[data-qa="sidebar-reset"]');
         this.openNowCheckBox = page.locator('[data-qa="availability-filter-switch"]');
-        this.restaurantCards = page.locator('[data-qa="mov-indicator-content"] [data-qa="text"]');
+        this.restaurantCardMinOrderTxt = page.locator('[data-qa="mov-indicator-content"] [data-qa="text"]');
+        this.showCategoriesBtn = page.getByRole('button', { name: 'Show more' });
+        this.categorySearchBox = page.locator('[data-qa="cuisine-search"] input');
+        this.categoryBill = page.locator('[data-qa="cuisine-filter-modal"] [data-qa="cuisine-filter-modal-item"] > div > div');
+        this.restaurantCards = page.locator('[data-qa="restaurant-card-element"]');
+        this.nextRoute = page.locator('iframe[src*="italian-food"]');
+        //TODO add proper selector for back btn
+        this.backToRestaurantsListBtn = page.locator('');
     }
 
+    /**
+     * Action Methods
+     */
     async goto() {
         await this.page.goto('https://www.lieferando.de/en/');
     }
@@ -45,6 +56,26 @@ exports.RestaurantsPage = class RestaurantsPage {
         await this.openNowCheckBox.click();
     }
 
+    async filterByItalianCategory() {
+        await this.filterByCategory(RESTAURANTS_CATEGORIES.ITALIAN);
+        await expect(this.page).toHaveURL(/.*italian-food/);
+    }
+
+    async filterByCategory(category) {
+        await this.showCategoriesBtn.click();
+        await expect(this.page).toHaveURL(/.*cuisine/);
+        await this.categorySearchBox.fill(category);
+        await this.page.waitForSelector('[data-qa="cuisine-filter-modal"] [data-qa="cuisine-filter-modal-item"] > div > div');
+        await this.categoryBill.nth(0).waitFor();
+        await this.categoryBill.nth(0).click();
+        await Promise.all([
+            this.page.waitForResponse(resp => resp.url().includes('/v1/track?eventKey=cuisineFilterSelected') && resp.status() === 200)
+        ]);
+    }
+
+    /**
+     * Helper Methods
+     */
     async getResultCounter(){
         return Number((await this.resultCounter.innerText()).replace(/[^0-9]/g, ''));
     }
@@ -60,11 +91,20 @@ exports.RestaurantsPage = class RestaurantsPage {
     }
 
     async verifyRandomResultOfMinOrder() {
-        //Expect actual returned cards count equal to the number displayed in the result counter
-        await expect(await this.restaurantCards.count()).toEqual(await this.getResultCounter());
+        await this.verifyResultsCount();
         //Pick random card and verify the min order value
         let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
-        let minOrderValue = Number((await this.restaurantCards.nth(randomIndex).innerText()).replace(/[^0-9\.-]+/g, "")/100);
+        let minOrderValue = Number((await this.restaurantCardMinOrderTxt.nth(randomIndex).innerText()).replace(/[^0-9\.-]+/g, "")/100);
         await expect(minOrderValue).toBeLessThanOrEqual(10);
+    }
+
+    async verifyItalianRestaurants() {
+        await this.verifyResultsCount();
+        //TODO find common attribute among the results
+    }
+
+    async verifyResultsCount() {
+        //Expect actual returned cards count equal to the number displayed in the result counter
+        await expect(await this.restaurantCards.count()).toEqual(await this.getResultCounter());
     }
 }
