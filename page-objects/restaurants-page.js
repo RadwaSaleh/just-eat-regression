@@ -94,10 +94,19 @@ exports.RestaurantsPage = class RestaurantsPage {
 
     async verifyRandomResultOfMinOrder() {
         await this.verifyResultsCount();
-        //Pick random card and verify the min order value
-        let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
-        let minOrderValue = Number((await this.restaurantCardMinOrderTxt.nth(randomIndex).innerText()).replace(/[^0-9\.-]+/g, "")/100);
-        await expect(minOrderValue).toBeLessThanOrEqual(10);
+        //Iterate through the restaurants cards and verify the min order value
+        for (const card of await this.restaurantCardMinOrderTxt.all()){
+            let minOrderValue = Number((await card.innerText()).replace(/[^0-9\.-]+/g, "")/100);
+            await expect(minOrderValue).toBeLessThanOrEqual(10);
+        }
+        /**
+         * Pick random card and verify the min order value - timely wise verification
+         */
+        /**
+         * let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
+         * let minOrderValue = Number((await this.restaurantCardMinOrderTxt.nth(randomIndex).innerText()).replace(/[^0-9\.-]+/g, "")/100);
+         * await expect(minOrderValue).toBeLessThanOrEqual(10);
+         */
     }
 
     async verifyItalianRestaurants() {
