@@ -29,6 +29,8 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.categoryBill = page.locator('[data-qa="cuisine-filter-modal"] [data-qa="cuisine-filter-modal-item"] > div > div');
         this.restaurantCards = page.locator('[data-qa="restaurant-card-element"]');
         this.nextRoute = page.locator('iframe[src*="italian-food"]');
+        this.menuPizza = page.getByText('Pizza');
+        this.menuPasta = page.getByText('Pasta');
         //TODO add proper selector for back btn
         this.backToRestaurantsListBtn = page.locator('');
     }
@@ -100,7 +102,12 @@ exports.RestaurantsPage = class RestaurantsPage {
 
     async verifyItalianRestaurants() {
         await this.verifyResultsCount();
-        //TODO find common attribute among the results
+        //Pick random card and verify the menu has pizza and pasta
+        let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
+        await this.restaurantCardMinOrderTxt.nth(randomIndex).waitFor();
+        await this.restaurantCardMinOrderTxt.nth(randomIndex).click();
+        await expect(await this.menuPizza.first()).toBeVisible();
+        await expect(await this.menuPasta.first()).toBeVisible();
     }
 
     async verifyResultsCount() {
