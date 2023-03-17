@@ -2,7 +2,11 @@
   "devDependencies": {
     "@playwright/test": "^1.31.2"
   },
-  "scripts": {},
+  "scripts": {
+    "test": "npx playwright test --reporter=list",
+    "headful-test": "npx playwright test --headed",
+    "test-and-report": "npx playwright test --reporter=html"
+  },
   "dependencies": {
     "playwright": "^1.31.2"
   }
