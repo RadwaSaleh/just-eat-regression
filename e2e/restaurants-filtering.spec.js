@@ -27,7 +27,7 @@ test.describe('Filtering restaurants list', async () => {
 
     test('filter by Italian Cuisine', async () => {
         await restaurantsPage.filterByItalianCategory();
-        await restaurantsPage.filterByOpenNow(); //Exclude closed restaurants as they don't show min order info on restaurant card
+        await restaurantsPage.filterByOpenNow();
         await restaurantsPage.showAllResults();
         await restaurantsPage.verifyItalianRestaurants();
     });

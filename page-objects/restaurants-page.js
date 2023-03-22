@@ -111,7 +111,12 @@ exports.RestaurantsPage = class RestaurantsPage {
 
     async verifyItalianRestaurants() {
         await this.verifyResultsCount();
-        //Pick random card and verify the menu has pizza and pasta
+        /**
+         * Pick random card and verify the menu has pizza and pasta
+         * TODO ask dev team to add common attribute for restaurant category to be used in automation
+         * otherwise this scenario wouldn't be suitable for e2e automation testing
+         */
+
         let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
         await this.restaurantCardMinOrderTxt.nth(randomIndex).waitFor();
         await this.restaurantCardMinOrderTxt.nth(randomIndex).click();
