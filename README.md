@@ -3,6 +3,9 @@
 This repo is meant to showcase e2e tests for Lieferando app (https://www.lieferando.de/en/) using Playwright Test.
 - Page Object Model design pattern is used, it increases readability of code and is much easier to manage.
 
+## Covered Scenarios 
+- Filter restaurants by minimum order value ‘10,00 € or less’
+- Filter restaurants by "Italian" cuisine 
 
 ## Setup
 1- Open terminal and change the current working directory to the location where you want the cloned directory.
