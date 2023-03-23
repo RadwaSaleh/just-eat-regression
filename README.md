@@ -28,5 +28,6 @@ This repo is meant to showcase e2e tests for Lieferando app (https://www.liefera
 - Test and generate HTML report
   `yarn test-and-report`
 
+#### Check reported [issues](https://github.com/RadwaSaleh/just-eat-regression)
 #### HTML Report Example:
 ![html-report-example.png](resources%2Fhtml-report-example.png)
