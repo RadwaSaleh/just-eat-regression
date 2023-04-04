@@ -24,6 +24,7 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.resetBtn = page.locator('[data-qa="sidebar-reset"]');
         this.openNowCheckBox = page.locator('[data-qa="availability-filter-switch"]');
         this.restaurantCardMinOrderTxt = page.locator('[data-qa="mov-indicator-content"] [data-qa="text"]');
+        this.restaurantCard = page.locator('[data-qa="mov-indicator-content"] [data-qa="restaurant-header-image"]');
         this.showCategoriesBtn = page.getByRole('button', { name: 'Show more' });
         this.categorySearchBox = page.locator('[data-qa="cuisine-search"] input');
         this.categoryBill = page.locator('[data-qa="cuisine-filter-modal"] [data-qa="cuisine-filter-modal-item"] > div > div');
@@ -130,6 +131,8 @@ exports.RestaurantsPage = class RestaurantsPage {
         let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
         await this.restaurantCardMinOrderTxt.nth(randomIndex).waitFor();
         await this.restaurantCardMinOrderTxt.nth(randomIndex).click();
+        await this.page.waitForURL('**/menu/*');
+        await expect(this.page).toHaveURL(/.*menu/);
         await expect(await this.menuPizza.first()).toBeVisible();
         await expect(await this.menuPasta.first()).toBeVisible();
     }
