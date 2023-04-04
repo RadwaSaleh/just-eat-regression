@@ -8,6 +8,8 @@
     "test-and-report": "npx playwright test --reporter=html"
   },
   "dependencies": {
-    "playwright": "^1.31.2"
+    "playwright": "^1.31.2",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
 }

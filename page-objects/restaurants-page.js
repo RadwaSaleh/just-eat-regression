@@ -6,6 +6,9 @@ exports.RestaurantsPage = class RestaurantsPage {
     /**
      * @param {import('@playwright/test').Page} page
      */
+    //================================================================================
+    // Constructor
+    //================================================================================
     constructor(page) {
         //create a class variable and assign it to page argument passed to the constructor
         this.page = page;
@@ -24,6 +27,7 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.resetBtn = page.locator('[data-qa="sidebar-reset"]');
         this.openNowCheckBox = page.locator('[data-qa="availability-filter-switch"]');
         this.restaurantCardMinOrderTxt = page.locator('[data-qa="mov-indicator-content"] [data-qa="text"]');
+        this.restaurantCard = page.locator('[data-qa="mov-indicator-content"] [data-qa="restaurant-header-image"]');
         this.showCategoriesBtn = page.getByRole('button', { name: 'Show more' });
         this.categorySearchBox = page.locator('[data-qa="cuisine-search"] input');
         this.categoryBill = page.locator('[data-qa="cuisine-filter-modal"] [data-qa="cuisine-filter-modal-item"] > div > div');
@@ -31,13 +35,15 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.nextRoute = page.locator('iframe[src*="italian-food"]');
         this.menuPizza = page.getByText('Pizza');
         this.menuPasta = page.getByText('Pasta');
+        this.noResultsMsg = page.locator('h2', { hasText: 'Let’s try that again...' });
+        this.italianQuickFilter = page.locator('[data-qa="swipe-navigation-item"]').locator('text="Italian"');
         //TODO add proper selector for back btn
         this.backToRestaurantsListBtn = page.locator('');
     }
 
-    /**
-     * Action Methods
-     */
+    //================================================================================
+    // Action Methods
+    //================================================================================
     async goto() {
         await this.page.goto('https://www.lieferando.de/en/');
     }
@@ -59,7 +65,10 @@ exports.RestaurantsPage = class RestaurantsPage {
     }
 
     async filterByItalianCategory() {
-        await this.filterByCategory(RESTAURANTS_CATEGORIES.ITALIAN);
+        await this.italianQuickFilter.click();
+        // TODO discuss with the team. In case of 0 results the search pill is not clickable
+        //  which makes this method not reusable for such cases
+        // await this.filterByCategory(RESTAURANTS_CATEGORIES.ITALIAN);
         await expect(this.page).toHaveURL(/.*italian-food/);
     }
 
@@ -75,21 +84,26 @@ exports.RestaurantsPage = class RestaurantsPage {
         ]);
     }
 
-    /**
-     * Helper Methods
-     */
+    //================================================================================
+    // Helper Methods
+    //================================================================================
     async getResultCounter(){
         return Number((await this.resultCounter.innerText()).replace(/[^0-9]/g, ''));
     }
 
     async showAllResults(){
-        await this.page.evaluate(async () => {
-            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-            for (let i = 0; i < document.body.scrollHeight; i += 100) {
-                window.scrollTo(0, i);
-                await delay(100);
-            }
-        });
+        if(await this.noResultsMsg.isVisible()){
+            console.log('No Results Found...')
+        }
+        else{
+            await this.page.evaluate(async () => {
+                const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+                for (let i = 0; i < document.body.scrollHeight; i += 100) {
+                    window.scrollTo(0, i);
+                    await delay(100);
+                }
+            });
+        }
     }
 
     async verifyRandomResultOfMinOrder() {
@@ -120,6 +134,8 @@ exports.RestaurantsPage = class RestaurantsPage {
         let randomIndex = Math.floor((Math.random() * await this.restaurantCards.count()) + 1);
         await this.restaurantCardMinOrderTxt.nth(randomIndex).waitFor();
         await this.restaurantCardMinOrderTxt.nth(randomIndex).click();
+        await this.page.waitForURL('**/menu/*');
+        await expect(this.page).toHaveURL(/.*menu/);
         await expect(await this.menuPizza.first()).toBeVisible();
         await expect(await this.menuPasta.first()).toBeVisible();
     }
