@@ -31,6 +31,8 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.nextRoute = page.locator('iframe[src*="italian-food"]');
         this.menuPizza = page.getByText('Pizza');
         this.menuPasta = page.getByText('Pasta');
+        this.noResultsMsg = page.locator('h2', { hasText: 'Let’s try that again...' });
+        this.italianQuickFilter = page.locator('[data-qa="swipe-navigation-item"]').locator('text="Italian"');
         //TODO add proper selector for back btn
         this.backToRestaurantsListBtn = page.locator('');
     }
@@ -59,7 +61,10 @@ exports.RestaurantsPage = class RestaurantsPage {
     }
 
     async filterByItalianCategory() {
-        await this.filterByCategory(RESTAURANTS_CATEGORIES.ITALIAN);
+        await this.italianQuickFilter.click();
+        // TODO discuss with the team. In case of 0 results the search pill is not clickable
+        //  which makes this method not reusable for such cases
+        // await this.filterByCategory(RESTAURANTS_CATEGORIES.ITALIAN);
         await expect(this.page).toHaveURL(/.*italian-food/);
     }
 
@@ -83,13 +88,18 @@ exports.RestaurantsPage = class RestaurantsPage {
     }
 
     async showAllResults(){
-        await this.page.evaluate(async () => {
-            const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-            for (let i = 0; i < document.body.scrollHeight; i += 100) {
-                window.scrollTo(0, i);
-                await delay(100);
-            }
-        });
+        if(await this.noResultsMsg.isVisible()){
+            console.log('No Results Found...')
+        }
+        else{
+            await this.page.evaluate(async () => {
+                const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+                for (let i = 0; i < document.body.scrollHeight; i += 100) {
+                    window.scrollTo(0, i);
+                    await delay(100);
+                }
+            });
+        }
     }
 
     async verifyRandomResultOfMinOrder() {
