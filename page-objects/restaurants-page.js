@@ -6,6 +6,9 @@ exports.RestaurantsPage = class RestaurantsPage {
     /**
      * @param {import('@playwright/test').Page} page
      */
+    //================================================================================
+    // Constructor
+    //================================================================================
     constructor(page) {
         //create a class variable and assign it to page argument passed to the constructor
         this.page = page;
@@ -38,9 +41,9 @@ exports.RestaurantsPage = class RestaurantsPage {
         this.backToRestaurantsListBtn = page.locator('');
     }
 
-    /**
-     * Action Methods
-     */
+    //================================================================================
+    // Action Methods
+    //================================================================================
     async goto() {
         await this.page.goto('https://www.lieferando.de/en/');
     }
@@ -81,9 +84,9 @@ exports.RestaurantsPage = class RestaurantsPage {
         ]);
     }
 
-    /**
-     * Helper Methods
-     */
+    //================================================================================
+    // Helper Methods
+    //================================================================================
     async getResultCounter(){
         return Number((await this.resultCounter.innerText()).replace(/[^0-9]/g, ''));
     }
